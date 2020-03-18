@@ -525,7 +525,8 @@ nav a:hover{
     /* font-weight: bolder; */
     padding-bottom: 70px;
     box-sizing: border-box;
-    padding-right: 20px;
+    padding-right: 30px;
+    line-height: 30px;
 }
 
 
