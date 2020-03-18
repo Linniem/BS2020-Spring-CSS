@@ -282,6 +282,10 @@ nav a{
     right: 0;
     top: 0;
 }
+nav a:hover{
+    color: #2ac5f4;
+    transition: .3s;
+}
 
 @media screen and (min-width: 997px){
     .cover-img img{
