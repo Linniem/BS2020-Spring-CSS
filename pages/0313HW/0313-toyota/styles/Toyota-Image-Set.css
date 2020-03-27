@@ -1,0 +1,72 @@
+.advantage-block{
+    width: 960px;
+    position: relative;
+    margin: auto;
+
+    height: 1000px;
+}
+
+.advantage-block:nth-child(odd) .advantage-gray-bg{
+    position: absolute;
+    z-index: -1;
+    background-color: #eee;
+    width: 439px;
+    height: 290px;
+    right: 0;
+    top: 30px;
+}
+.advantage-block:nth-child(even) .advantage-gray-bg{
+    position: absolute;
+    z-index: -1;
+    background-color: #eee;
+    width: 439px;
+    height: 290px;
+    left: 285px;
+    top: 60px;
+}
+.advantage-block:nth-child(odd) .advantage-info{
+    position: absolute;
+    z-index: 1;
+}
+.advantage-block:nth-child(even) .advantage-info{
+    position: absolute;
+    right: 0;
+    z-index: 1;
+}
+.advantage-block:nth-child(odd) .advantage-bg{
+    position: absolute;
+    z-index: 0;
+    left: 183px;
+    top :137px;
+}
+.advantage-block:nth-child(even) .advantage-bg{
+    position: absolute;
+    z-index: 0;
+    left: 5px;
+    top :137px;
+}
+.advantage-block:nth-child(odd) .advantage-yt-icon{
+    position: absolute;
+    z-index: 1;
+    right: 73px;
+    top :337px;
+}
+.advantage-block:nth-child(even) .advantage-yt-icon{
+    position: absolute;
+    z-index: 1;
+    left: 0;
+    top :337px;
+}
+
+.advantage-block:nth-child(odd) .advantage-rev{
+    position: absolute;
+    z-index: 1;
+    top: 540px;
+    left: 39px;
+}
+.advantage-block:nth-child(even) > .advantage-rev{
+    position: absolute;
+    z-index: 1;
+    top: 540px;
+    right: 0;
+}
