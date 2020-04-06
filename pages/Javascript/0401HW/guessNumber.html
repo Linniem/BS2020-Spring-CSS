@@ -124,29 +124,26 @@
         var minNumber = 0;
         var maxNumber = 100;
         var target = -1;
-        var guessed = false;
+        var gameIsInited = false;
 
         var textRange = document.getElementById("display-text");
         var inputBox = document.getElementById("input-text");
         var generateBt = document.getElementById("generate-bt");
 
-        generateBt.addEventListener("click", function () {
+        generateBt.addEventListener("click", gameInit);
+
+        function gameInit() {
             target = Math.floor(Math.random() * 100) + 1;
             minNumber = 0;
             maxNumber = 100;
-            refreshRange();
+            refreshDisplayRange();
             clearInputBox();
             console.log("target: " + target);
-        });
-
-        function resetIfGuessed() {
-            if (guessed == true) {
-                guessed = false;
-                clearInputBox();
-            };
+            gameIsInited = true;
         };
+
         function addNumber(inputText) {
-            if (!checkIsInitGame()) {
+            if (!gameIsInited) {
                 alert('請先產生數字');
             } else if (inputBox.value + inputText <= maxNumber && !(inputText == 0 && inputBox.value == '0')) {
                 inputBox.value += inputText;
@@ -154,7 +151,7 @@
                 alert('超出範圍');
             };
         };
-        function refreshRange() {
+        function refreshDisplayRange() {
             textRange.innerText = minNumber + ' ~ ' + maxNumber;
         };
         function clearInputBox() {
@@ -169,43 +166,33 @@
         }
 
         document.getElementById('bt1').addEventListener("click", function () {
-            resetIfGuessed();
             addNumber('1');
         });
         document.getElementById('bt2').addEventListener("click", function () {
-            resetIfGuessed();
             addNumber('2');
         });
         document.getElementById('bt3').addEventListener("click", function () {
-            resetIfGuessed();
             addNumber('3');
         });
         document.getElementById('bt4').addEventListener("click", function () {
-            resetIfGuessed();
             addNumber('4');
         });
         document.getElementById('bt5').addEventListener("click", function () {
-            resetIfGuessed();
             addNumber('5');
         });
         document.getElementById('bt6').addEventListener("click", function () {
-            resetIfGuessed();
             addNumber('6');
         });
         document.getElementById('bt7').addEventListener("click", function () {
-            resetIfGuessed();
             addNumber('7');
         });
         document.getElementById('bt8').addEventListener("click", function () {
-            resetIfGuessed();
             addNumber('8');
         });
         document.getElementById('bt9').addEventListener("click", function () {
-            resetIfGuessed();
             addNumber('9');
         });
         document.getElementById('bt0').addEventListener("click", function () {
-            resetIfGuessed();
             addNumber('0');
         });
         document.getElementById('btx').addEventListener("click", function () {
@@ -215,19 +202,21 @@
             clearInputBox();
         });
         document.getElementById('btv').addEventListener("click", function () {
-            guessed = true;
+            
             if (!checkIsInitGame()) {
                 alert('請先產生數字');
             } else if (inputBox.value == target) {
                 alert('YOU WIN!!');
+                alert('Game restart.');
+                gameInit();
             } else if (minNumber < inputBox.value && inputBox.value < target) {
                 minNumber = parseInt(inputBox.value) + 1;
-                refreshRange();
+                refreshDisplayRange();
             } else if (target < inputBox.value && inputBox.value < maxNumber) {
                 maxNumber = parseInt(inputBox.value) - 1;
-                refreshRange();
+                refreshDisplayRange();
             };
-
+            clearInputBox();
         });
 
     </script>
