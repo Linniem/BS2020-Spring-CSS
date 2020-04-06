@@ -1,0 +1,221 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css"
+        integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+
+    <title>Bulls and Cows</title>
+    <style>
+        .container {
+            padding-top: 50px;
+        }
+
+        .container>*:nth-child(2) {
+            padding-top: 20px;
+        }
+
+        .guess-success,
+        .guess-fail {
+            border-radius: 5px;
+            box-sizing: border-box;
+            padding: 3px 5px;
+            color: white;
+            display: inline-block;
+            width: 50px;
+            text-align: center;
+            margin-right: 10px;
+        }
+
+        .guess-fail {
+            background-color: rgb(255, 83, 83);
+        }
+
+        .guess-success {
+            background-color: rgb(97, 241, 41);
+        }
+
+        .input-group-text button {
+            height: 24px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div class="row">
+            <div class="col"></div>
+            <div class="col-6 d-flex justify-content-center">
+                <button type="button" id="bt-game-start" class="btn btn-light border w-100">遊戲開始</button>
+                <button type="button" id="bt-give-up" class="btn btn-light border w-100">放棄重來</button>
+                <button type="button" id="bt-peek-answer" class="btn btn-light border w-100">偷看答案</button>
+            </div>
+            <div class="col"></div>
+        </div>
+
+        <div class="row">
+            <div class="col"></div>
+            <div class="col-6">
+                <div class="input-group mb-3">
+                    <div class="input-group-prepend">
+                        <span class="input-group-text">猜答案</span>
+                    </div>
+                    <input type="text" id="text-input" class="form-control" aria-label="Amount (to the nearest dollar)">
+                    <div class="input-group-append">
+                        <span class="input-group-text"><button id="bt-guess">猜!</button></span>
+                    </div>
+                </div>
+            </div>
+            <div class="col"></div>
+        </div>
+
+        <div class="row">
+            <div class="col"></div>
+            <div class="col-6">
+                <ul id="guess-history" class="list-group">
+                </ul>
+            </div>
+            <div class="col"></div>
+        </div>
+    </div>
+
+    <script>
+        var gameIsInit = false;
+        var target = '';
+
+        document.getElementById('bt-game-start').addEventListener("click", GameInit);
+        document.getElementById('bt-give-up').addEventListener("click", GameGiveUp);
+        document.getElementById('bt-peek-answer').addEventListener("click", PeekAnswer);
+        document.getElementById('bt-guess').addEventListener("click", GuessAswer);
+        var historyList = document.getElementById('guess-history');
+
+        function GameInit() {
+            gameIsInit = true;
+            ClearHistory(historyList);
+            ClearInputBox();
+            target = GenerateRand4Dig();
+        };
+
+        function ClearHistory() {
+            while (historyList.firstChild) {
+                historyList.removeChild(historyList.firstChild);
+            };
+        };
+
+        function GenerateRand4Dig() {
+            let result = '';
+            while (result.length != 4) {
+                let nextDig = Math.floor(Math.random() * 10);
+                if (!result.includes(nextDig)) {
+                    result += nextDig;
+                };
+            };
+            console.log('g:' + result);
+            return result;
+        };
+
+        function GameGiveUp() {
+            if (CheckGameIsInit()) {
+                alert('You give up,\nThe answer is ' + target);
+                alert('Game is restart.');
+                GameInit();
+            };
+        };
+
+        function CheckGameIsInit() {
+            if (gameIsInit == false) {
+                alert('You should start the game.');
+                return false;
+            } else {
+                return true;
+            };
+        };
+
+        function PeekAnswer() {
+            if (CheckGameIsInit()) {
+                alert('You peeked,\nand answer is ' + target);
+            };
+        };
+
+        function GuessAswer() {
+            if (CheckGameIsInit()) {
+                let inputText = document.getElementById('text-input').value;
+                if (inputText.length != 4 || isNaN(parseInt(inputText)) || CheckTextRepeat(inputText)) {
+                    alert('You should input 4 digit\nand non-repeat number.');
+                } else {
+                    let compareResult = CompareTarget(inputText, target);
+                    InsertHisAndJudge(compareResult, inputText);
+                    if (compareResult[0] == 4) {
+                        setTimeout(function () { alert('YOU WIN!!') }, 0.1);
+                        gameIsInit = false;
+                    };
+                };
+            };
+            ClearInputBox();
+        };
+
+        function CheckTextRepeat(inputText) {
+            result = false;
+            for (let index = 0; index < inputText.length - 1; index++) {
+                if (inputText.indexOf(inputText[index]) != inputText.lastIndexOf(inputText[index])) {
+                    result = true;
+                };
+            };
+            return result;
+        };
+
+        function CompareTarget(inputText, goalText) {
+            let aCount = 0;
+            let bCount = 0;
+            for (let index = 0; index < inputText.length; index++) {
+                if (goalText.includes(inputText[index])) {
+                    if (inputText[index] == goalText[index]) {
+                        aCount++;
+                    } else {
+                        bCount++;
+                    };
+                };
+            };
+            return aCount.toString() + bCount.toString();
+        };
+
+        function ClearInputBox() {
+            inputText = document.getElementById('text-input').value = '';
+        };
+
+        function InsertHisAndJudge(compareResult, inputText) {
+            let outerLi = document.createElement('li');
+            outerLi.className = 'list-group-item';
+            let innerSpan = document.createElement('span');
+            if (compareResult[0] == 4) {
+                innerSpan.className = 'guess-success';
+            } else {
+                innerSpan.className = 'guess-fail';
+            };
+            innerSpan.innerText = compareResult[0] + 'A' + compareResult[1] + 'B';
+            outerLi.appendChild(innerSpan);
+            outerLi.append(inputText);
+            document.getElementById('guess-history').prepend(outerLi);
+        };
+
+
+    </script>
+    <!-- Optional JavaScript -->
+    <!-- jQuery first, then Popper.js, then Bootstrap JS -->
+    <script src="https://code.jquery.com/jquery-3.4.1.slim.min.js"
+        integrity="sha384-J6qa4849blE2+poT4WnyKhv5vZF5SrPo0iEjwBvKU7imGFAV0wwj1yYfoRSJoZ+n"
+        crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js"
+        integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo"
+        crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js"
+        integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6"
+        crossorigin="anonymous"></script>
+</body>
+
+</html>
