@@ -15,6 +15,9 @@
         .container {
             margin-top: 30px;
         }
+        .container > select {
+            margin-bottom: 10px;
+        }
 
         table>*,
         tr>* {
@@ -24,6 +27,10 @@
         td,
         th {
             padding: 10px;
+        }
+
+        th {
+            cursor: pointer;
         }
 
         .sort-dec::after {
@@ -55,9 +62,9 @@
 <body>
     <div class="container">
         <select id="activity-selector">
-            <option value="ipadModels">ipadModels</option>
-            <option value="classMembers">classMembers</option>
-            <option value="employees">employees</option>
+            <option value="ipadModels">Ipad Models</option>
+            <option value="classMembers">Class Members</option>
+            <option value="employees">Employees</option>
         </select>
         <div class="row">
             <div class="col d-flex justify-content-center" id="ipad-table"></div>
@@ -306,9 +313,9 @@
                     shouldSwap = false;
                     let firstText = inputNodeList[trIndex].childNodes[compareIndex].innerText;
                     let secondText = inputNodeList[trIndex + 1].childNodes[compareIndex].innerText;
-                    
+
                     firstText = TextFilter(firstText);
-                    secondText = TextFilter(secondText);    
+                    secondText = TextFilter(secondText);
 
                     if (order == 'dec') {
                         if (firstText < secondText) {
@@ -330,11 +337,11 @@
         };
 
         function TextFilter(inputString) {
-            let newCompareTarget = inputString.replace('GB','').replace('10.2','');
+            let newCompareTarget = inputString.replace('GB', '').replace('10.2', '');
             let tryParse = parseInt(newCompareTarget);
             if (!isNaN(tryParse)) {
                 return tryParse;
-            }else{
+            } else {
                 return inputString.toLowerCase();
             }
         };
