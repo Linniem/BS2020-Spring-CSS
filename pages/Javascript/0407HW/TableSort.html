@@ -1,0 +1,372 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css"
+        integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+
+    <title>Tables</title>
+    <style>
+        .container {
+            margin-top: 30px;
+        }
+
+        table>*,
+        tr>* {
+            border: 1px solid black;
+        }
+
+        td,
+        th {
+            padding: 10px;
+        }
+
+        .sort-dec::after {
+            content: '';
+            position: absolute;
+            display: inline-block;
+            width: 0px;
+            height: 0px;
+            border-left: 8px solid transparent;
+            border-right: 8px solid transparent;
+            border-top: 12px solid rgb(248, 180, 53);
+            transform: translate(5px, 12px);
+        }
+
+        .sort-inc::after {
+            content: '';
+            position: absolute;
+            display: inline-block;
+            width: 0px;
+            height: 0px;
+            border-left: 8px solid transparent;
+            border-right: 8px solid transparent;
+            border-bottom: 12px solid rgb(248, 180, 53);
+            transform: translate(5px, 12px);
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <select id="activity-selector">
+            <option value="ipadModels">ipadModels</option>
+            <option value="classMembers">classMembers</option>
+            <option value="employees">employees</option>
+        </select>
+        <div class="row">
+            <div class="col d-flex justify-content-center" id="ipad-table"></div>
+        </div>
+    </div>
+
+    <script>
+        // data
+        const ipadModels = [
+            {
+                "sku": "MW762",
+                "price": 10900,
+                "storage": "32GB",
+                "description": "10.2 吋 iPad Wi-Fi 機型 32GB - 金色",
+                "picture": "ipad_gold.png"
+            },
+            {
+                "sku": "MW792",
+                "price": 13900,
+                "storage": "128GB",
+                "description": "10.2 吋 iPad Wi-Fi 機型 128GB - 金色",
+                "picture": "ipad_gold.png"
+            },
+            {
+                "sku": "MW742",
+                "price": 10900,
+                "storage": "32GB",
+                "description": "10.2 吋 iPad Wi-Fi 機型 32GB - 太空灰色",
+                "picture": "ipad_space.png"
+            },
+            {
+                "sku": "MW772",
+                "price": 13900,
+                "storage": "128GB",
+                "description": "10.2 吋 iPad Wi-Fi 機型 128GB - 太空灰色",
+                "picture": "ipad_space.png"
+            },
+            {
+                "sku": "MW752",
+                "price": 10900,
+                "storage": "32GB",
+                "description": "10.2 吋 iPad Wi-Fi 機型 32GB - 銀色",
+                "picture": "ipad_silver.png"
+            },
+            {
+                "sku": "MW782",
+                "price": 13900,
+                "storage": "128GB",
+                "description": "10.2 吋 iPad Wi-Fi 機型 128GB - 銀色",
+                "picture": "ipad_silver.png"
+            },
+            {
+                "sku": "MW6D2",
+                "price": 15400,
+                "storage": "32GB",
+                "description": "10.2 吋 iPad Wi-Fi + 行動網路機型 32GB - 金色",
+                "picture": "ipad_gold.png"
+            },
+            {
+                "sku": "MW6G2",
+                "price": 18400,
+                "storage": "128GB",
+                "description": "10.2 吋 iPad Wi-Fi + 行動網路機型 128GB - 金色",
+                "picture": "ipad_gold.png"
+            },
+            {
+                "sku": "MW6A2",
+                "price": 15400,
+                "storage": "32GB",
+                "description": "10.2 吋 iPad Wi-Fi + 行動網路機型 32GB - 太空灰色",
+                "picture": "ipad_space.png"
+            },
+            {
+                "sku": "MW6E2",
+                "price": 18400,
+                "storage": "128GB",
+                "description": "10.2 吋 iPad Wi-Fi + 行動網路機型 128GB - 太空灰色",
+                "picture": "ipad_space.png"
+            },
+            {
+                "sku": "MW6C2",
+                "price": 15400,
+                "storage": "32GB",
+                "description": "10.2 吋 iPad Wi-Fi + 行動網路機型 32GB - 銀色",
+                "picture": "ipad_silver.png"
+            },
+            {
+                "sku": "MW6F2",
+                "price": 18400,
+                "storage": "128GB",
+                "description": "10.2 吋 iPad Wi-Fi + 行動網路機型 128GB - 銀色",
+                "picture": "ipad_silver.png"
+            }
+        ];
+        const classMembers = [
+            {
+                "No.": "01",
+                "Age": 22,
+                "Gender": "F",
+                "Grades": "88",
+            },
+            {
+                "No.": "02",
+                "Age": 23,
+                "Gender": "M",
+                "Grades": "98",
+            },
+            {
+                "No.": "03",
+                "Age": 20,
+                "Gender": "M",
+                "Grades": "68",
+            },
+            {
+                "No.": "04",
+                "Age": 25,
+                "Gender": "F",
+                "Grades": "100",
+            },
+            {
+                "No.": "05",
+                "Age": 24,
+                "Gender": "F",
+                "Grades": "83",
+            },
+            {
+                "No.": "06",
+                "Age": 22,
+                "Gender": "M",
+                "Grades": "80",
+            },
+            {
+                "No.": "07",
+                "Age": 28,
+                "Gender": "F",
+                "Grades": "79",
+            },
+            {
+                "No.": "08",
+                "Age": 27,
+                "Gender": "M",
+                "Grades": "56",
+            },
+            {
+                "No.": "09",
+                "Age": 25,
+                "Gender": "F",
+                "Grades": "83",
+            },
+            {
+                "No.": "10",
+                "Age": 29,
+                "Gender": "F",
+                "Grades": "77",
+            }
+        ];
+        const employees = [
+            { name: "Kevin", age: 32, height: 175, weight: 64 },
+            { name: "David", age: 35, height: 170, weight: 60 },
+            { name: "Mary", age: 22, height: 172, weight: 52 },
+            { name: "John", age: 18, height: 178, weight: 70 },
+            { name: "Cindy", age: 26, height: 168, weight: 50 }
+        ];
+
+        // init & data input functions
+        var htmlTable = document.getElementById('ipad-table');
+        AddDataToTable(htmlTable, ipadModels);
+
+        function AddDataToTable(displayTable, inputData) {
+            let newTable = document.createElement('table');
+            newTable.className = 'table table-striped';
+            AddThead(newTable, inputData);
+            AddTbody(newTable, inputData);
+            displayTable.appendChild(newTable);
+        };
+
+        function AddThead(targetTable, data) {
+            let newThead = document.createElement('thead');
+            newThead.className = 'thead-dark';
+            let newTr = document.createElement('tr');
+            let headTextArr = Object.getOwnPropertyNames(data[0]);
+            headTextArr.forEach(headText => {
+                newTr.appendChild(CreateCell('th', headText));
+            });
+            newThead.appendChild(newTr);
+            targetTable.appendChild(newThead);
+        };
+
+        function AddTbody(TargetTable, data) {
+            let newTbody = document.createElement('tbody');
+            data.forEach(eachRow => {
+                let newTr = document.createElement('tr');
+                let propArr = Object.getOwnPropertyNames(eachRow);
+                propArr.forEach(propName => {
+                    newTr.appendChild(CreateCell('td', eachRow[propName]));
+                });
+                newTbody.appendChild(newTr);
+            });
+            TargetTable.appendChild(newTbody);
+        };
+
+        function CreateCell(htmlTag, inputText) {
+            let newElement = document.createElement(htmlTag);
+            if (htmlTag == 'th') {
+                AddSortEvent(newElement);
+            };
+            newElement.innerText = inputText;
+            return newElement;
+        };
+
+        function AddSortEvent(targetTh) {
+            targetTh.addEventListener("click", function () {
+                let thCurrentClass = this.className;
+
+                // clear all t-head css-style in same t-row 
+                let thNodes = this.parentNode.childNodes;
+                thNodes.forEach(thUnit => {
+                    thUnit.className = '';
+                });
+
+                // find correct index in the t-row
+                let clickText = this.innerText;
+                let textGroup = [...this.parentNode.childNodes].map(x => x.innerHTML);
+                let clickIndex = textGroup.indexOf(clickText);
+
+                // bubble sort: decrease is default, benefit show first.
+                let trNodes = this.parentNode.parentNode.parentNode.querySelector('tbody').childNodes;
+                if (thCurrentClass == '' || thCurrentClass == 'sort-inc') {
+                    BubbleSort(trNodes, clickIndex, 'dec');
+                    this.className = 'sort-dec';
+                } else {
+                    BubbleSort(trNodes, clickIndex, 'inc');
+                    this.className = 'sort-inc';
+                }
+            });
+        };
+
+        function BubbleSort(inputNodeList, compareIndex, order) {
+            let keepSort = true;
+            let shouldSwap;
+            while (keepSort) {
+                keepSort = false;
+                let shouldSwitch = false;
+                let trIndex;
+                for (trIndex = 0; trIndex < (inputNodeList.length - 1); trIndex++) {
+                    shouldSwap = false;
+                    let firstText = inputNodeList[trIndex].childNodes[compareIndex].innerText;
+                    let secondText = inputNodeList[trIndex + 1].childNodes[compareIndex].innerText;
+                    
+                    firstText = TextFilter(firstText);
+                    secondText = TextFilter(secondText);    
+
+                    if (order == 'dec') {
+                        if (firstText < secondText) {
+                            shouldSwitch = true;
+                            break;
+                        };
+                    } else if (order == 'inc') {
+                        if (firstText > secondText) {
+                            shouldSwitch = true;
+                            break;
+                        };
+                    };
+                }
+                if (shouldSwitch) {
+                    inputNodeList[trIndex].parentNode.insertBefore(inputNodeList[trIndex + 1], inputNodeList[trIndex]);
+                    keepSort = true;
+                };
+            };
+        };
+
+        function TextFilter(inputString) {
+            let newCompareTarget = inputString.replace('GB','').replace('10.2','');
+            let tryParse = parseInt(newCompareTarget);
+            if (!isNaN(tryParse)) {
+                return tryParse;
+            }else{
+                return inputString.toLowerCase();
+            }
+        };
+
+        // selector functions
+        var selector = document.getElementById("activity-selector");
+        selector.addEventListener("change", function () {
+            htmlTable.innerHTML = '';
+            if (selector.value == "ipadModels") {
+                AddDataToTable(htmlTable, ipadModels);
+            }
+            if (selector.value == "classMembers") {
+                AddDataToTable(htmlTable, classMembers);
+            }
+            if (selector.value == "employees") {
+                AddDataToTable(htmlTable, employees);
+            }
+        });
+
+
+    </script>
+    <!-- Optional JavaScript -->
+    <!-- jQuery first, then Popper.js, then Bootstrap JS -->
+    <script src="https://code.jquery.com/jquery-3.4.1.slim.min.js"
+        integrity="sha384-J6qa4849blE2+poT4WnyKhv5vZF5SrPo0iEjwBvKU7imGFAV0wwj1yYfoRSJoZ+n"
+        crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js"
+        integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo"
+        crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js"
+        integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6"
+        crossorigin="anonymous"></script>
+</body>
+
+</html>
