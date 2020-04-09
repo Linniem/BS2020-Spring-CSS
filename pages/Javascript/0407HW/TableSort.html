@@ -287,7 +287,7 @@
 
                 // find correct index in the t-row
                 let clickText = this.innerText;
-                let textGroup = [...this.parentNode.childNodes].map(x => x.innerHTML);
+                let textGroup = [...this.parentNode.childNodes].map(x => x.innerText);
                 let clickIndex = textGroup.indexOf(clickText);
 
                 // bubble sort: decrease is default, benefit show first.
