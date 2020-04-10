@@ -136,8 +136,6 @@
                     marker.icon = iconAvalibel;
                 }
 
-
-
                 let contentString =
                     '<div>' +
                     '<h5>店家名稱 : ' + everyPos.properties.name + '</h5>' +
@@ -251,7 +249,6 @@
                 const element = maskPosJson[index];
                 if (maskPosJson[index].properties.town == this.innerText &&
                     maskPosJson[index].properties.county == this.parentNode.childNodes[0].data) {
-                    // console.log(maskPosJson[index].geometry.coordinates);
                     let lat = maskPosJson[index].geometry.coordinates[1];
                     let lng = maskPosJson[index].geometry.coordinates[0];
                     map.setCenter({
@@ -275,12 +272,11 @@
 
         function initMap() {
             map = new google.maps.Map(document.getElementById('map'), {
-                center: { lat: 24.689760, lng: 120.908146 },
+                center: { lat: 25.0443278, lng: 121.5416321 },
                 zoom: 15
             });
             infoWindow = new google.maps.InfoWindow;
 
-            // Try HTML5 geolocation.
             if (navigator.geolocation) {
                 navigator.geolocation.getCurrentPosition(function (position) {
                     var pos = {
@@ -296,7 +292,6 @@
                     handleLocationError(true, infoWindow, map.getCenter());
                 });
             } else {
-                // Browser doesn't support Geolocation
                 handleLocationError(false, infoWindow, map.getCenter());
             }
         };
