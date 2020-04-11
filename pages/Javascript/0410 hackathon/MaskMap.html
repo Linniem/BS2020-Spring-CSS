@@ -234,9 +234,9 @@
             let urlNoStock = 'https://maps.google.com/mapfiles/kml/paddle/red-square.png';
 
             if (feature.properties.mask_adult === 0) {
-                return urlAvailable;
-            } else {
                 return urlNoStock;
+            } else {
+                return urlAvailable;
             };
         };
 
