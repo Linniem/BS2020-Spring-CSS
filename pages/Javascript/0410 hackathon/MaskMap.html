@@ -45,17 +45,33 @@
             border-radius: 0px;
         }
 
+        @media screen and (max-width: 576px) {
+            #text-choose-contry li {
+                padding: 5px;
+            }
+
+            #countryList>li {
+                padding: 12px;
+            }
+
+            #countryList .display-town {
+                padding: 5px;
+                font-size: 18px;
+                transform: translateX(10px);
+            }
+        }
+
         li {
             text-align: center;
             width: 100%;
             cursor: pointer;
         }
 
-        .list-town {
+        .display-town {
             background-color: rgb(245, 245, 245);
         }
 
-        .list-town:hover {
+        .display-town:hover {
             background-color: rgb(160, 255, 165);
             transition: .5s;
 
@@ -85,215 +101,314 @@
                 <ul class="list-group" id="text-choose-contry">
                     <li class="list-group-item">選擇縣市</li>
                 </ul>
-                <ul class="list-group" id="countryList">
-                </ul>
+                <ul class="list-group" id="countryList"></ul>
             </div>
         </div>
     </div>
     <div id="map"></div>
+
     <script>
-        var map;
-        var maskPosJson;
-        var displayCountry = [];
-        var countries = [];
-        var closeCountryFlag = true;
-        var aliveInfoWindow = '';
+        const URL = "https://raw.githubusercontent.com/kiang/pharmacies/master/json/points.json";
+        // const URL = 'https://linniem-web.azurewebsites.net/pages/Javascript/0410%20hackathon/NewMaskData.json'
+        // const URL = "NewMaskData.json";
+        var MAP_ELEMENT;
+        var FEATURES;
+        var EXIST_INFO_WINDOW = '';
+        var COUNTIES_TOWNS = [];
+        var CLOSE_COUNTY = true;
 
-        MapAndDataInit();
+        GetJsonAndInit();
 
-        function MapAndDataInit() {
+        function initMap() {
+            MAP_ELEMENT = new google.maps.Map(document.getElementById('map'), {
+                // default view
+                center: { lat: 25.0443278, lng: 121.5416321 },
+                zoom: 15
+            });
 
-            // let url = "NewMaskData.json";
-            let url = "https://raw.githubusercontent.com/kiang/pharmacies/master/json/points.json";
+            // navigator
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(function (position) {
+                    let deviceLocation = {
+                        lat: position.coords.latitude,
+                        lng: position.coords.longitude
+                    };
+                    MAP_ELEMENT.setCenter(deviceLocation);
+                }, function () {
+                    console.log("Navigator : User enable geolocation but device can't get location.");
+                });
+            } else {
+                console.log("Navigator : User does not enable geolocation.");
+            };
+        };
+
+        function GetJsonAndInit() {
             let xhr = new XMLHttpRequest;
             xhr.onload = function () {
                 if (xhr.readyState == 4 && xhr.status == 200) {
-                    maskPosJson = JSON.parse(this.responseText).features;
-                    dataFeed_callback(maskPosJson);
+                    FEATURES = JSON.parse(this.responseText).features;
+                    SetMakers();
                 } else {
-                    console.log('load error');
-                }
-            }
-            xhr.open("GET", url);
+                    alert('Failed to get JSON file.');
+                    console.log('Failed to get JSON file.');
+                };
+            };
+            xhr.open("GET", URL);
             xhr.send();
         };
 
-        function dataFeed_callback(positionInfoData) {
-            positionInfoData.forEach(everyPos => {
-                let latLng = new google.maps.LatLng(everyPos.geometry.coordinates[1], everyPos.geometry.coordinates[0]);
-
-                let iconAvalibel = 'http://maps.google.com/mapfiles/kml/paddle/grn-stars.png';
-                let iconNoStock = 'http://maps.google.com/mapfiles/kml/paddle/red-square.png';
-
+        function SetMakers() {
+            let MAP_ELEMENT_address = MAP_ELEMENT;
+            FEATURES.forEach(feature => {
+                let featureLatLng = new google.maps.LatLng(feature.geometry.coordinates[1], feature.geometry.coordinates[0]);
+                let iconUrl = GetIconUrl(feature);
                 let marker = new google.maps.Marker({
-                    position: latLng,
-                    icon: '',
-                    map: map
-                });
-                if (everyPos.properties.mask_adult === 0) {
-                    marker.icon = iconNoStock;
-                } else {
-                    marker.icon = iconAvalibel;
-                }
-
-                let contentString =
-                    '<div>' +
-                    '<h5>店家名稱 : ' + everyPos.properties.name + '</h5>' +
-                    '<p>地址 : ' + everyPos.properties.address + '</p>' +
-                    '<p>電話 : ' + everyPos.properties.phone + '</p>' +
-                    '<p>成人口罩數量 : ' + everyPos.properties.mask_adult + '</p>' +
-                    '<p>兒童口罩數量 : ' + everyPos.properties.mask_child + '</p>';
-
-                contentString += GetAvalibleTable(everyPos.properties.available);
-
-                contentString +=
-                    '<p>備註 : ' + everyPos.properties.note + '</p>' +
-                    '<p>最後更新時間 : ' + everyPos.properties.updated + '</p>' +
-                    '</div>';
-                var infowindow = new google.maps.InfoWindow({
-                    content: contentString
-                });
-                marker.addListener('click', function () {
-                    if (aliveInfoWindow != '') {
-                        aliveInfoWindow.close();
-                        aliveInfoWindow = '';
-                    }
-                    var infoWindow = new google.maps.InfoWindow({ content: contentString });
-                    infowindow.open(map, marker);
-                    aliveInfoWindow = infowindow;
+                    position: featureLatLng,
+                    icon: iconUrl,
+                    map: MAP_ELEMENT_address
                 });
 
-
-                CollectCountries(everyPos.properties);
+                if (feature.properties.county == '' || feature.properties.town == '') {
+                    CorrectEmptyCountyTown(feature.properties);
+                };
+                SetInfoWindow(marker, feature);
+                CollectCounties(feature.properties);
             });
         };
 
-        function GetAvalibleTable(rowText) {
-            let resultTable = '';
-            let startText = '<table><tbody><tr><th>星期一</th><th>星期二</th><th>星期三</th><th>星期四</th><th>星期五</th><th>星期六</th><th>星期日</th></tr>';
-            let endText = '<tbody><table>';
+        function CorrectEmptyCountyTown(property) {
+            // filter invalid address
+            let filtedAddress = property.address.replace(/[為590]/g, '');
 
-            let availableTextArr = rowText.split('、').map(x => x.substring(5));
+            // Fill empty county and town from address.
+            property.address = filtedAddress;
+            property.county = filtedAddress.substring(0, 3);
+            property.town = filtedAddress.substring(3, 6);
 
-            resultTable += startText;
-            for (let trIndex = 0; trIndex < 3; trIndex++) {
-                resultTable += '<tr>';
-                for (let tdIndex = 0; tdIndex < 7; tdIndex++) {
-                    resultTable += '<td>';
-                    if (availableTextArr[trIndex * tdIndex] == undefined || availableTextArr[trIndex * tdIndex] =='') {
-                        resultTable += ' - ';
-                    }else{
-                        resultTable += availableTextArr[trIndex * tdIndex];
-                    };
-                    resultTable += '</td>';
+            // 2-leter town like '東區' 
+            if (property.town.indexOf('區') == 1) {
+                property.town = property.town.substring(0, 2);
+            };
+
+            // renew old letter
+            if (property.county.indexOf('巿') != -1) {
+                property.county = property.county.replace('巿', '市');
+            };
+            if (property.county.indexOf('台') != -1) {
+                property.county = property.county.replace('台', '臺');
+            };
+
+            // area typo 
+            switch (property.county) {
+                case '臺南東':
+                    property.county = '臺南市';
+                    property.town = '東區';
+                    break;
+                case '淡水區':
+                    property.town = '淡水區';
+                    property.county = '新北市'
+                    break;
+                case '花蓮市':
+                    property.county = '花蓮縣';
+                    property.town = '花蓮市';
+                    break;
+                case '彰化市':
+                    property.county = '彰化縣';
+                    property.town = '彰化市';
+                    break;
+                case '屏東市':
+                    property.county = '屏東縣';
+                    property.town = '屏東市';
+                    break;
+                case '臺東市':
+                    property.county = '臺東縣';
+                    property.town = '臺東市';
+                    break;
+                default:
+                    break;
+            };
+        };
+
+        function GetIconUrl(feature) {
+            let urlAvailable = 'http://maps.google.com/mapfiles/kml/paddle/grn-stars.png';
+            let urlNoStock = 'http://maps.google.com/mapfiles/kml/paddle/red-square.png';
+
+            if (feature.properties.mask_adult === 0) {
+                return urlAvailable;
+            } else {
+                return urlNoStock;
+            };
+        };
+
+        function SetInfoWindow(marker, feature) {
+            let infoContent = GetInfoContent(feature.properties);
+            let infowindow = new google.maps.InfoWindow({
+                content: infoContent
+            });
+
+            marker.addListener('click', function () {
+                // clear opened info window
+                if (EXIST_INFO_WINDOW != '') {
+                    EXIST_INFO_WINDOW.close();
+                    EXIST_INFO_WINDOW = '';
                 };
-                resultTable += '</tr>';
+                infowindow.open(MAP_ELEMENT, marker);
+                EXIST_INFO_WINDOW = infowindow;
+            });
+        };
+
+        function GetInfoContent(properties) {
+            let infoContent = '';
+            let availableTable = GetAvailableTable(properties.available);
+
+            infoContent +=
+                '<div>' +
+                '<h5>' + properties.name + '</h5>' +
+                '<p>地址 : ' + properties.address + '</p>' +
+                '<p>電話 : ' + properties.phone + '</p>' +
+                '<p>成人口罩數量 : ' + properties.mask_adult + '</p>' +
+                '<p>兒童口罩數量 : ' + properties.mask_child + '</p>';
+
+            infoContent += availableTable;
+
+            infoContent +=
+                '<p>備註 : ' + properties.note + '</p>' +
+                '<p>最後更新時間 : ' + properties.updated + '</p>' +
+                '</div>';
+
+            return infoContent;
+        };
+
+        function GetAvailableTable(rawTextAvailable) {
+            // Filter useless string and convert to a array.
+            let availableStringArray = rawTextAvailable
+                .split('、')
+                .map(timeSection => timeSection.replace(/[星期上午下晚上一二三四五六日]/g, ''));
+
+            let beginText = '<table><tbody><tr><th>星期一</th><th>星期二</th><th>星期三</th><th>星期四</th><th>星期五</th><th>星期六</th><th>星期日</th></tr>';
+            let endText = '<tbody><table>';
+            let tableContent = '';
+
+            for (let trIndex = 0; trIndex < 3; trIndex++) {
+                tableContent += '<tr>';
+                for (let tdIndex = 0; tdIndex < 7; tdIndex++) {
+                    tableContent += '<td>';
+
+                    // add available status
+                    let available = availableStringArray[trIndex * tdIndex];
+                    if (available == undefined || available == '') {
+                        // avaliable is empty
+                        tableContent += ' - ';
+                    } else {
+                        tableContent += available;
+                    };
+                    tableContent += '</td>';
+                };
+                tableContent += '</tr>';
             };
-            resultTable += endText;
 
-            return resultTable;
+            return beginText + tableContent + endText;
         };
 
-        function CollectCountries(inputCountry) {
-            let inputCountryName = inputCountry.county;
-            let countryIndex = displayCountry.indexOf(inputCountryName);
-            if (countryIndex == -1 && inputCountryName != '') {
-                displayCountry.push(inputCountryName);
+        function CollectCounties(properties) {
+            let countyName = properties.county;
+            let countyIndex = FindCountyIndex(countyName);
 
-                countries.push({ countryName: inputCountryName, towns: [] });
-
-                let newLi = document.createElement('li');
-                newLi.textContent = inputCountryName;
-                newLi.className = 'list-group-item';
-                newLi.addEventListener('click', EventClickExpandCountry);
-                document.getElementById('countryList').appendChild(newLi);
+            if (countyIndex == -1) {
+                // County not in list, push to list. { countryName:'', towns:[] }
+                COUNTIES_TOWNS.push({ countryName: countyName, towns: [] });
+                AddCountyElement(countyName);
+            } else if (COUNTIES_TOWNS[countyIndex].towns.indexOf(properties.town) == -1) {
+                // County in list, but town not in the county's towns, push it to towns.
+                COUNTIES_TOWNS[countyIndex].towns.push(properties.town);
             };
-
-            if (countryIndex != -1) {
-                if (countries[countryIndex].towns.indexOf(inputCountry.town) == -1) {
-                    countries[countryIndex].towns.push(inputCountry.town);
-                }
-            }
         };
 
-        function EventClickExpandCountry() {
-            let countryIndex = displayCountry.indexOf(this.innerText);
-            ClearExistTown(this);
-            ImportTowns(this, countryIndex);
-            let test = document.createElement('li');
-            this.removeEventListener('click', EventClickExpandCountry);
+        function FindCountyIndex(countyName) {
+            resultIndex = -1;
+            for (let index = 0; index < COUNTIES_TOWNS.length; index++) {
+                if (COUNTIES_TOWNS[index].countryName == countyName) {
+                    resultIndex = index;
+                    break;
+                };
+            };
+            return resultIndex;
         };
 
-        function ImportTowns(countryNode, countryIndex) {
-            countries[countryIndex].towns.forEach(eachTown => {
+        function AddCountyElement(countyName) {
+            let CountyElementLi = document.createElement('li');
+            CountyElementLi.textContent = countyName;
+            CountyElementLi.className = 'list-group-item';
+            CountyElementLi.addEventListener('click', EventClickCounty);
+            document.getElementById('countryList').appendChild(CountyElementLi);
+        };
+
+        function EventClickCounty() {
+            this.removeEventListener('click', EventClickCounty);
+            this.addEventListener('click', EventCheckClickedElement);
+
+            AddTownElements(this);
+        };
+
+        function AddTownElements(countryNode) {
+            ClearDisplayedTownElements();
+
+            let countryIndex = FindCountyIndex(countryNode.innerText);
+            COUNTIES_TOWNS[countryIndex].towns.forEach(eachTown => {
                 let liTown = document.createElement('li');
                 liTown.innerText = eachTown;
-                liTown.className = 'list-group-item list-town';
+                liTown.className = 'list-group-item display-town';
                 liTown.addEventListener('click', EventClickTown);
                 countryNode.insertBefore(liTown, null);
             });
-            countryNode.addEventListener('click', EventCloseCurrent);
         };
 
-        function EventCloseCurrent() {
-            if (closeCountryFlag) {
-                ClearExistTown(this);
+        /*
+            Because county-element contains town-elements.
+            When user click town-element will trigger events in both county-element and town-element.
+            But county-element's events will trigger first ,then trigger town-element's events.
+            CLOSE_COUNTY default is true.
+            When user click county-element, CLOSE_COUNTY is true, then clear all town-elements.
+            If user click town-element, CLOSE_COUNTY will change to false first ,then enter this 
+            EventCheckClickedElement, false do not clear town-elements and set CLOSE_COUNTY to default.
+        */
+        function EventCheckClickedElement() {
+            if (CLOSE_COUNTY) {
+                ClearDisplayedTownElements();
             } else {
-                closeCountryFlag = true;
+                CLOSE_COUNTY = true;
             }
         }
 
         function EventClickTown() {
-            closeCountryFlag = false;
-            for (let index = 0; index < maskPosJson.length; index++) {
-                const element = maskPosJson[index];
-                if (maskPosJson[index].properties.town == this.innerText &&
-                    maskPosJson[index].properties.county == this.parentNode.childNodes[0].data) {
-                    let lat = maskPosJson[index].geometry.coordinates[1];
-                    let lng = maskPosJson[index].geometry.coordinates[0];
-                    map.setCenter({
-                        lat: lat,
-                        lng: lng
+            CLOSE_COUNTY = false;
+
+            for (let index = 0; index < FEATURES.length; index++) {
+                let townName = this.innerText;
+                let countyName = this.parentNode.childNodes[0].data;
+
+                if (FEATURES[index].properties.town == townName &&
+                    FEATURES[index].properties.county == countyName) {
+
+                    MAP_ELEMENT.setCenter({
+                        lat: FEATURES[index].geometry.coordinates[1],
+                        lng: FEATURES[index].geometry.coordinates[0]
                     });
                     break;
-                }
-            }
-        }
-
-        function ClearExistTown(imputCountryNode) {
-            let countryNodes = imputCountryNode.parentNode.querySelectorAll('.list-town');
-            if (countryNodes.length != 0) {
-                countryNodes[0].parentNode.addEventListener('click', EventClickExpandCountry);
-            }
-            countryNodes.forEach(eachNode => {
-                eachNode.remove();
-            })
+                };
+            };
         };
 
-        function initMap() {
-            map = new google.maps.Map(document.getElementById('map'), {
-                center: { lat: 25.0443278, lng: 121.5416321 },
-                zoom: 15
-            });
-            infoWindow = new google.maps.InfoWindow;
+        function ClearDisplayedTownElements() {
+            let countryNodes = document.querySelectorAll('.display-town');
 
-            if (navigator.geolocation) {
-                navigator.geolocation.getCurrentPosition(function (position) {
-                    var pos = {
-                        lat: position.coords.latitude,
-                        lng: position.coords.longitude
-                    };
-                    // alert(pos.lat + ' ' + pos.lng);
-                    // infoWindow.setPosition(pos);
-                    // infoWindow.setContent('Location found.');
-                    // infoWindow.open(map);
-                    map.setCenter(pos);
-                }, function () {
-                    handleLocationError(true, infoWindow, map.getCenter());
-                });
-            } else {
-                handleLocationError(false, infoWindow, map.getCenter());
-            }
+            if (countryNodes.length != 0) {
+                countryNodes[0].parentNode.addEventListener('click', EventClickCounty);
+            };
+
+            countryNodes.forEach(eachNode => {
+                eachNode.remove();
+            });
         };
 
     </script>
