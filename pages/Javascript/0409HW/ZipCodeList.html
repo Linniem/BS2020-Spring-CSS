@@ -77,7 +77,7 @@
                     let tdArray = newTr.querySelectorAll('td');
 
                     tdArray[0].textContent = city.City;
-                    tdArray[1].textContent = district.Districts;
+                    tdArray[1].textContent = district.AreaList;
                     tdArray[2].textContent = district.ZipCode;
 
                     tableElement.appendChild(newTr);
@@ -87,16 +87,16 @@
         };
 
         function ConvertData(originData) {
-            originData.forEach(city => {
+            originData.forEach(city => {       
                 let newCity = {
-                    City: city.City,
+                    City: city.CityName,
                     Districts: []
                 };
-
-                city.Districts.forEach(area => {
-                    newCity.Districts.push({ Districts: area.Districts, ZipCode: area.ZipCode });
-                });
-
+                
+                city.AreaList.forEach(area => {                   
+                    newCity.Districts.push({ AreaList: area.AreaName, ZipCode: area.ZipCode });
+                });  
+                     
                 ADDRESS_DATA.push(newCity);
             });
         };
