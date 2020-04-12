@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style>
+        #btLoadData {
+            display: inline-block;
+            padding: 10px;
+            border: 1px solid gray;
+            margin-bottom: 15px;
+        }
+
+        table,
+        td,
+        tr {
+            border: 1px solid black;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>郵遞區號列表</h1>
+    <div id="btLoadData">讀取資料</div>
+    <template>
+        <tr>
+            <td></td>
+            <td></td>
+            <td></td>
+        </tr>
+    </template>
+
+    <script>
+        var ADDRESS_DATA;
+        // var URL = 'NewAddressData.json';
+        var URL = 'https://linniem-web.azurewebsites.net/pages/Javascript/0409HW/NewAddressData.json';
+        GetJsonFile('NewAddressData.json');
+
+        function GetJsonFile(filePath) {
+            let rawFile = new XMLHttpRequest();
+            rawFile.open("GET", filePath);
+            rawFile.onreadystatechange = function () {
+                if (rawFile.readyState === 4) {
+                    if (rawFile.status === 200 || rawFile.status === 0) {
+                        ADDRESS_DATA = JSON.parse(rawFile.responseText);
+                        SetClickEvent();
+                    };
+                };
+            };
+            rawFile.send(null);
+        };
+
+        function SetClickEvent() {
+            document.getElementById('btLoadData').addEventListener('click', function () {
+                AppenTable(document.body);
+            });
+        };
+
+        function AppenTable(body) {
+            let fragment = document.createDocumentFragment();
+            let tableElement = document.createElement('table');
+
+            AppendTrTd(tableElement);
+
+            fragment.appendChild(tableElement);
+            body.appendChild(fragment);
+        };
+
+        function AppendTrTd(tableElement) {
+            let tableTemplate = document.getElementsByTagName('template')[0].cloneNode(true);
+            let trTemplate = tableTemplate.content.querySelector('tr');
+
+            ADDRESS_DATA.forEach(city => {
+                city.Districts.forEach(district => {
+                    let newTr = trTemplate.cloneNode(true);
+                    let tdArray = newTr.querySelectorAll('td');
+
+                    tdArray[0].textContent = city.City;
+                    tdArray[1].textContent = district.Districts;
+                    tdArray[2].textContent = district.ZipCode;
+
+                    tableElement.appendChild(newTr);
+                });
+            });
+
+        };
+
+        /*
+        var NEW_JSON_DATA = [];
+        function ConvertData(originData) {
+            originData.forEach(city => {
+                let newCity = {
+                    City: '',
+                    Districts: []
+                };
+                newCity.City = city.CityName;
+
+                city.AreaList.forEach(area => {
+                    newCity.Districts.push({ Districts: area.AreaName, ZipCode: area.ZipCode });
+                });
+                NEW_JSON_DATA.push(newCity);
+            });
+            console.log(JSON.stringify(NEW_JSON_DATA));
+        };
+        */
+    </script>
+</body>
+
+</html>
