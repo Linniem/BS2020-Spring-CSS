@@ -12,13 +12,15 @@
 
     <title>Characters</title>
     <style>
-        .card-image-section{
+        .card-image-section {
             padding: 10px;
         }
-        .card{
+
+        .card {
             border-radius: 0px;
         }
-        .card:hover{
+
+        .card:hover {
             background-color: rgb(235, 235, 235);
         }
     </style>
@@ -36,10 +38,12 @@
                         <div class="card-body">
                             <h6 class="card-title" id="characterName">Name</h6>
                             <p class="card-text" id="characterPrice">Something</p>
-                            <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#modal1" id="infoButton">
+                            <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#modal1"
+                                id="infoButton">
                                 info
                             </button>
-                            <div class="modal fade" id="modal1" tabindex="-1" role="dialog" aria-labelledby="modal1Label" aria-hidden="true">
+                            <div class="modal fade" id="modal1" tabindex="-1" role="dialog"
+                                aria-labelledby="modal1Label" aria-hidden="true">
                                 <div class="modal-dialog" role="document">
                                     <div class="modal-content">
                                         <div class="modal-header">
@@ -55,7 +59,8 @@
                                             <div class="modal-text"></div>
                                         </div>
                                         <div class="modal-footer">
-                                            <button type="button" class="btn btn-secondary"data-dismiss="modal">Close</button>
+                                            <button type="button" class="btn btn-secondary"
+                                                data-dismiss="modal">Close</button>
                                         </div>
                                     </div>
                                 </div>
@@ -110,11 +115,11 @@
                 // #characterPrice set innerTEXT
                 cardAndModal.querySelector('#characterImg').src = character.gsx$img.$t;
                 cardAndModal.querySelector('#characterName').innerText = character.gsx$name.$t;
-                cardAndModal.querySelector('#characterPrice').innerText = character.gsx$price.$t;
+                cardAndModal.querySelector('#characterPrice').innerText = '$: ' + character.gsx$price.$t;
 
                 // button id
                 // #infoButton set data-target: '#modal1'         
-                cardAndModal.querySelector('#infoButton').setAttribute('data-target','#' + character.gsx$id.$t);
+                cardAndModal.querySelector('#infoButton').setAttribute('data-target', '#' + character.gsx$id.$t);
 
                 // modal content
                 // .fade set id: 'modal1'
@@ -123,14 +128,14 @@
                 //               set innerTEXT
                 // .modal-text set innnerTEXT
                 cardAndModal.querySelector('.fade').id = character.gsx$id.$t;
-                cardAndModal.querySelector('.fade').setAttribute('aria-labelledby',character.gsx$id.$t+'Label');
-                cardAndModal.querySelector('.modal-title').id = character.gsx$id.$t+'Label';
+                cardAndModal.querySelector('.fade').setAttribute('aria-labelledby', character.gsx$id.$t + 'Label');
+                cardAndModal.querySelector('.modal-title').id = character.gsx$id.$t + 'Label';
                 cardAndModal.querySelector('.modal-title').innerText = character.gsx$name.$t;
                 cardAndModal.querySelector('#modalImage').src = character.gsx$img.$t;
                 cardAndModal.querySelector('.modal-text').innerText = character.gsx$information.$t;
 
 
-                fragment.appendChild(cardAndModal);    
+                fragment.appendChild(cardAndModal);
             });
             appendTarget.appendChild(fragment);
         };
