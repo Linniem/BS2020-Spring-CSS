@@ -49,9 +49,11 @@
             #text-choose-contry li {
                 padding: 1px;
             }
+
             #countyList>li {
                 padding: 12px;
             }
+
             #countyList .display-town {
                 padding: 12px 0px;
                 font-size: 18px;
@@ -157,11 +159,14 @@
         function SetMakers() {
             let MAP_ELEMENT_address = MAP_ELEMENT;
             FEATURES.forEach(feature => {
-                let featureLatLng = new google.maps.LatLng(feature.geometry.coordinates[1], feature.geometry.coordinates[0]);
+                let featurePosition = new google.maps.LatLng(feature.geometry.coordinates[1], feature.geometry.coordinates[0]);
                 let iconUrl = GetIconUrl(feature);
+                let titleText = GetTitleText(feature);
+
                 let marker = new google.maps.Marker({
-                    position: featureLatLng,
+                    position: featurePosition,
                     icon: iconUrl,
+                    title: titleText,
                     map: MAP_ELEMENT_address
                 });
 
@@ -171,6 +176,26 @@
                 SetInfoWindow(marker, feature);
                 CollectCounties(feature.properties);
             });
+        };
+
+        function GetIconUrl(feature) {
+            let urlAvailable = 'https://maps.google.com/mapfiles/kml/paddle/grn-stars.png';
+            let urlNoStock = 'https://maps.google.com/mapfiles/kml/paddle/red-square.png';
+
+            if (feature.properties.mask_adult === 0) {
+                return urlNoStock;
+            } else {
+                return urlAvailable;
+            };
+        };
+
+        function GetTitleText(feature) {
+            titleText = '';
+            titleText += '成人: ';
+            titleText += feature.properties.mask_adult;
+            titleText += '\n兒童: ';
+            titleText += feature.properties.mask_child;
+            return titleText;
         };
 
         function CorrectEmptyCountyTown(property) {
@@ -223,17 +248,6 @@
                     break;
                 default:
                     break;
-            };
-        };
-
-        function GetIconUrl(feature) {
-            let urlAvailable = 'https://maps.google.com/mapfiles/kml/paddle/grn-stars.png';
-            let urlNoStock = 'https://maps.google.com/mapfiles/kml/paddle/red-square.png';
-
-            if (feature.properties.mask_adult === 0) {
-                return urlNoStock;
-            } else {
-                return urlAvailable;
             };
         };
 
