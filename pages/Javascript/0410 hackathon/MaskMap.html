@@ -47,17 +47,14 @@
 
         @media screen and (max-width: 576px) {
             #text-choose-contry li {
-                padding: 5px;
+                padding: 1px;
             }
-
-            #countryList>li {
+            #countyList>li {
                 padding: 12px;
             }
-
-            #countryList .display-town {
-                padding: 5px;
+            #countyList .display-town {
+                padding: 12px 0px;
                 font-size: 18px;
-                transform: translateX(10px);
             }
         }
 
@@ -101,16 +98,16 @@
                 <ul class="list-group" id="text-choose-contry">
                     <li class="list-group-item">選擇縣市</li>
                 </ul>
-                <ul class="list-group" id="countryList"></ul>
+                <ul class="list-group" id="countyList"></ul>
             </div>
         </div>
     </div>
     <div id="map"></div>
 
     <script>
-        const URL = "https://raw.githubusercontent.com/kiang/pharmacies/master/json/points.json";
+        // const URL = "https://raw.githubusercontent.com/kiang/pharmacies/master/json/points.json";
         // const URL = 'https://linniem-web.azurewebsites.net/pages/Javascript/0410%20hackathon/NewMaskData.json'
-        // const URL = "NewMaskData.json";
+        const URL = "NewMaskData.json";
         var MAP_ELEMENT;
         var FEATURES;
         var EXIST_INFO_WINDOW = '';
@@ -340,7 +337,7 @@
             CountyElementLi.textContent = countyName;
             CountyElementLi.className = 'list-group-item';
             CountyElementLi.addEventListener('click', EventClickCounty);
-            document.getElementById('countryList').appendChild(CountyElementLi);
+            document.getElementById('countyList').appendChild(CountyElementLi);
         };
 
         function EventClickCounty() {
