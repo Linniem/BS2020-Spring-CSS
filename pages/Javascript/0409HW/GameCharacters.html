@@ -15,30 +15,18 @@
         .card-image-section{
             padding: 10px;
         }
+        .card{
+            border-radius: 0px;
+        }
+        .card:hover{
+            background-color: rgb(235, 235, 235);
+        }
     </style>
 </head>
 
 <body>
     <div class="container">
         <div id="characterField" class="row flex-wrap d-flex">
-            <!-- 
-                card content:
-                #characterImg set src
-                #characterName set innerTEXT
-                #characterPrice set innerTEXT
-                
-                button:
-                #infoButton set data-target: '#modal1'
-                
-                modal:
-                .fade set id: 'modal1'
-                                aria-labelledby: 'modal1Label'
-                .modal-title  set id: 'modal1Label'
-                              set innerTEXT
-                .modal-body set innnerTEXT
-            -->
-
-
             <template>
                 <div class="col-3 p-0">
                     <div class="card">
@@ -51,8 +39,7 @@
                             <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#modal1" id="infoButton">
                                 info
                             </button>
-                            <div class="modal fade" id="modal1" tabindex="-1" role="dialog"
-                                aria-labelledby="modal1Label" aria-hidden="true">
+                            <div class="modal fade" id="modal1" tabindex="-1" role="dialog" aria-labelledby="modal1Label" aria-hidden="true">
                                 <div class="modal-dialog" role="document">
                                     <div class="modal-content">
                                         <div class="modal-header">
@@ -62,11 +49,13 @@
                                             </button>
                                         </div>
                                         <div class="modal-body">
-                                            1
+                                            <div class="modal-image">
+                                                <img src="" alt="" id="modalImage">
+                                            </div>
+                                            <div class="modal-text"></div>
                                         </div>
                                         <div class="modal-footer">
-                                            <button type="button" class="btn btn-secondary"
-                                                data-dismiss="modal">Close</button>
+                                            <button type="button" class="btn btn-secondary"data-dismiss="modal">Close</button>
                                         </div>
                                     </div>
                                 </div>
@@ -132,12 +121,13 @@
                 //                 aria-labelledby: 'modal1Label'
                 // .modal-title  set id: 'modal1Label'
                 //               set innerTEXT
-                // .modal-body set innnerTEXT
+                // .modal-text set innnerTEXT
                 cardAndModal.querySelector('.fade').id = character.gsx$id.$t;
                 cardAndModal.querySelector('.fade').setAttribute('aria-labelledby',character.gsx$id.$t+'Label');
                 cardAndModal.querySelector('.modal-title').id = character.gsx$id.$t+'Label';
                 cardAndModal.querySelector('.modal-title').innerText = character.gsx$name.$t;
-                cardAndModal.querySelector('.modal-body').innerText = character.gsx$information.$t;
+                cardAndModal.querySelector('#modalImage').src = character.gsx$img.$t;
+                cardAndModal.querySelector('.modal-text').innerText = character.gsx$information.$t;
 
 
                 fragment.appendChild(cardAndModal);    
