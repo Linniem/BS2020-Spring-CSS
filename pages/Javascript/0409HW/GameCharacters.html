@@ -10,15 +10,84 @@
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css"
         integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
 
-    <title>title</title>
+    <title>Characters</title>
     <style>
-        
+        .card-image-section{
+            padding: 10px;
+        }
     </style>
 </head>
 
 <body>
+    <div class="container">
+        <div id="characterField" class="row flex-wrap d-flex">
+            <!-- 
+                card content:
+                #characterImg set src
+                #characterName set innerTEXT
+                #characterPrice set innerTEXT
+                
+                button:
+                #infoButton set data-target: '#modal1'
+                
+                modal:
+                .fade set id: 'modal1'
+                                aria-labelledby: 'modal1Label'
+                .modal-title  set id: 'modal1Label'
+                              set innerTEXT
+                .modal-body set innnerTEXT
+            -->
+
+
+            <template>
+                <div class="col-3 p-0">
+                    <div class="card">
+                        <div class="card-image-section">
+                            <img src="" class="card-img-top" alt="..." id="characterImg">
+                        </div>
+                        <div class="card-body">
+                            <h6 class="card-title" id="characterName">Name</h6>
+                            <p class="card-text" id="characterPrice">Something</p>
+                            <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#modal1" id="infoButton">
+                                info
+                            </button>
+                            <div class="modal fade" id="modal1" tabindex="-1" role="dialog"
+                                aria-labelledby="modal1Label" aria-hidden="true">
+                                <div class="modal-dialog" role="document">
+                                    <div class="modal-content">
+                                        <div class="modal-header">
+                                            <h5 class="modal-title" id="modal1Label">Modal title</h5>
+                                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                                <span aria-hidden="true">&times;</span>
+                                            </button>
+                                        </div>
+                                        <div class="modal-body">
+                                            1
+                                        </div>
+                                        <div class="modal-footer">
+                                            <button type="button" class="btn btn-secondary"
+                                                data-dismiss="modal">Close</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </template>
+        </div>
+    </div>
+
+    <!-- Button trigger modal -->
+
+
+    <!-- Modal -->
+
+
     <script>
-        var URL = 'https://spreadsheets.google.com/feeds/list/1y_WYotDw9COdRAHe-P15VCkQuZJFZx_iCdAQpAWJCCM/od6/public/values?alt=json';
+        var URL = 'https://raw.githubusercontent.com/Linniem/BS2020-Spring-CSS/master/pages/Javascript/0409HW/CharacterData.json';
+        // var URL = 'CharacterData.json';
+
         GetJsonFile(URL);
 
         function GetJsonFile(jsonUrl) {
@@ -27,11 +96,53 @@
             rawFile.onreadystatechange = function () {
                 if (rawFile.readyState === 4) {
                     if (rawFile.status === 200 || rawFile.status === 0) {
-                        console.log(JSON.parse(rawFile.responseText));            
+                        let rawJson = JSON.parse(rawFile.responseText);
+                        LoadAndSetElements(rawJson.feed.entry);
                     };
                 };
             };
             rawFile.send(null);
+        };
+
+        function LoadAndSetElements(characters) {
+            let fragment = document.createDocumentFragment();
+            let appendTarget = document.getElementById('characterField');
+            let template = document.getElementsByTagName('template')[0];
+            console.log(template);
+
+            characters.forEach(character => {
+                let cardAndModal = template.content.cloneNode(true);
+                //
+                let temp = document.createElement('p');
+
+                // card info
+                // #characterImg set src
+                // #characterName set innerTEXT
+                // #characterPrice set innerTEXT
+                cardAndModal.querySelector('#characterImg').src = character.gsx$img.$t;
+                cardAndModal.querySelector('#characterName').innerText = character.gsx$name.$t;
+                cardAndModal.querySelector('#characterPrice').innerText = character.gsx$price.$t;
+
+                // button id
+                // #infoButton set data-target: '#modal1'         
+                cardAndModal.querySelector('#infoButton').setAttribute('data-target','#' + character.gsx$id.$t);
+
+                // modal content
+                // .fade set id: 'modal1'
+                //                 aria-labelledby: 'modal1Label'
+                // .modal-title  set id: 'modal1Label'
+                //               set innerTEXT
+                // .modal-body set innnerTEXT
+                cardAndModal.querySelector('.fade').id = character.gsx$id.$t;
+                cardAndModal.querySelector('.fade').setAttribute('aria-labelledby',character.gsx$id.$t+'Label');
+                cardAndModal.querySelector('.modal-title').id = character.gsx$id.$t+'Label';
+                cardAndModal.querySelector('.modal-title').innerText = character.gsx$name.$t;
+                cardAndModal.querySelector('.modal-body').innerText = character.gsx$information.$t;
+
+
+                fragment.appendChild(cardAndModal);    
+            });
+            appendTarget.appendChild(fragment);
         };
     </script>
 
