@@ -33,9 +33,8 @@
     </template>
 
     <script>
-        var ADDRESS_DATA;
-        // var URL = 'NewAddressData.json';
-        var URL = 'https://linniem-web.azurewebsites.net/pages/Javascript/0409HW/NewAddressData.json';
+        var ADDRESS_DATA=[];
+        var URL = 'https://raw.githubusercontent.com/2opex/Portfolio/master/JS/TaiwanAddress/TaiwanAddress.json';
         GetJsonFile('NewAddressData.json');
 
         function GetJsonFile(filePath) {
@@ -44,7 +43,7 @@
             rawFile.onreadystatechange = function () {
                 if (rawFile.readyState === 4) {
                     if (rawFile.status === 200 || rawFile.status === 0) {
-                        ADDRESS_DATA = JSON.parse(rawFile.responseText);
+                        ConvertData(JSON.parse(rawFile.responseText));
                         SetClickEvent();
                     };
                 };
@@ -87,24 +86,21 @@
 
         };
 
-        /*
-        var NEW_JSON_DATA = [];
         function ConvertData(originData) {
             originData.forEach(city => {
                 let newCity = {
-                    City: '',
+                    City: city.City,
                     Districts: []
                 };
-                newCity.City = city.CityName;
 
-                city.AreaList.forEach(area => {
-                    newCity.Districts.push({ Districts: area.AreaName, ZipCode: area.ZipCode });
+                city.Districts.forEach(area => {
+                    newCity.Districts.push({ Districts: area.Districts, ZipCode: area.ZipCode });
                 });
-                NEW_JSON_DATA.push(newCity);
+
+                ADDRESS_DATA.push(newCity);
             });
-            console.log(JSON.stringify(NEW_JSON_DATA));
         };
-        */
+        
     </script>
 </body>
 
