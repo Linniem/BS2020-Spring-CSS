@@ -72,16 +72,9 @@
         </div>
     </div>
 
-    <!-- Button trigger modal -->
-
-
-    <!-- Modal -->
-
-
     <script>
         var URL = 'https://raw.githubusercontent.com/Linniem/BS2020-Spring-CSS/master/pages/Javascript/0409HW/CharacterData.json';
         // var URL = 'CharacterData.json';
-
         GetJsonFile(URL);
 
         function GetJsonFile(jsonUrl) {
@@ -91,48 +84,59 @@
                 if (rawFile.readyState === 4) {
                     if (rawFile.status === 200 || rawFile.status === 0) {
                         let rawJson = JSON.parse(rawFile.responseText);
-                        LoadAndSetElements(rawJson.feed.entry);
+                        let myJson = ConvertData(rawJson);     
+                        LoadAndSetElements(myJson);
                     };
                 };
             };
             rawFile.send(null);
         };
 
+        function ConvertData(inputJson) {
+            let myJson = [];
+            inputJson.feed.entry.forEach(character => {
+                myJson.push({
+                    imgUrl:character.gsx$img.$t,
+                    name:character.gsx$name.$t,
+                    price:character.gsx$price.$t,
+                    modalId:character.gsx$id.$t,
+                    info:character.gsx$information.$t
+                });
+            });
+            return myJson;
+        };
+
         function LoadAndSetElements(characters) {
             let fragment = document.createDocumentFragment();
             let appendTarget = document.getElementById('characterField');
             let template = document.getElementsByTagName('template')[0];
-            console.log(template);
 
             characters.forEach(character => {
                 let cardAndModal = template.content.cloneNode(true);
-                //
-                let temp = document.createElement('p');
-
                 // card info
                 // #characterImg set src
                 // #characterName set innerTEXT
                 // #characterPrice set innerTEXT
-                cardAndModal.querySelector('#characterImg').src = character.gsx$img.$t;
-                cardAndModal.querySelector('#characterName').innerText = character.gsx$name.$t;
-                cardAndModal.querySelector('#characterPrice').innerText = '$' + character.gsx$price.$t;
+                cardAndModal.querySelector('#characterImg').src = character.imgUrl;
+                cardAndModal.querySelector('#characterName').innerText = name;
+                cardAndModal.querySelector('#characterPrice').innerText = '$' + character.price;
 
                 // button id
-                // #infoButton set data-target: '#modal1'         
-                cardAndModal.querySelector('#infoButton').setAttribute('data-target', '#' + character.gsx$id.$t);
+                // #infoButton set data-target: '#' + modalId    
+                cardAndModal.querySelector('#infoButton').setAttribute('data-target', '#' + character.modalId);
 
                 // modal content
-                // .fade set id: 'modal1'
-                //                 aria-labelledby: 'modal1Label'
-                // .modal-title  set id: 'modal1Label'
+                // .fade set id: 'modalId'
+                //                 aria-labelledby: 'modalIdLabel'
+                // .modal-title  set id: 'modalIdLabel'
                 //               set innerTEXT
                 // .modal-text set innnerTEXT
-                cardAndModal.querySelector('.fade').id = character.gsx$id.$t;
-                cardAndModal.querySelector('.fade').setAttribute('aria-labelledby', character.gsx$id.$t + 'Label');
-                cardAndModal.querySelector('.modal-title').id = character.gsx$id.$t + 'Label';
-                cardAndModal.querySelector('.modal-title').innerText = character.gsx$name.$t;
-                cardAndModal.querySelector('#modalImage').src = character.gsx$img.$t;
-                cardAndModal.querySelector('.modal-text').innerText = character.gsx$information.$t;
+                cardAndModal.querySelector('.fade').id = character.modalId;
+                cardAndModal.querySelector('.fade').setAttribute('aria-labelledby', character.modalId + 'Label');
+                cardAndModal.querySelector('.modal-title').id = character.modalId + 'Label';
+                cardAndModal.querySelector('.modal-title').innerText = character.name;
+                cardAndModal.querySelector('#modalImage').src = character.imgUrl;
+                cardAndModal.querySelector('.modal-text').innerText = character.info;
 
 
                 fragment.appendChild(cardAndModal);
