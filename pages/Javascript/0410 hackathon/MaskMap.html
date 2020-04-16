@@ -31,7 +31,7 @@
             }
 
             .county-menu-m-close {
-                position: relative;
+                position: absolute;
                 z-index: 99;
                 height: 0%;
                 bottom: 0%;
@@ -39,7 +39,7 @@
             }
 
             .county-menu-m-open {
-                position: relative;
+                position: absolute;
                 z-index: 99;
                 height: 100%;
                 bottom: 0%;
@@ -85,21 +85,6 @@
         .list-group-item:first-child,
         .list-group-item:last-child {
             border-radius: 0px;
-        }
-
-        @media screen and (max-width: 576px) {
-            #text-choose-contry li {
-                padding: 1px;
-            }
-
-            #countyList>li {
-                padding: 12px;
-            }
-
-            #countyList .display-town {
-                padding: 12px 0px;
-                font-size: 18px;
-            }
         }
 
         li {
@@ -151,7 +136,6 @@
 
     <script>
         const URL = "https://raw.githubusercontent.com/kiang/pharmacies/master/json/points.json";
-        // const URL = 'https://linniem-web.azurewebsites.net/pages/Javascript/0410%20hackathon/NewMaskData.json'
         // const URL = "NewMaskData.json";
         var MAP_ELEMENT;
         var FEATURES;
