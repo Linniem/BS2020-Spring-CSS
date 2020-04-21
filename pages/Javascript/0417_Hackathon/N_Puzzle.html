@@ -1,0 +1,294 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css"
+        integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+
+    <title>N-Puzzle</title>
+    <style>
+        #puzzle-body {
+            margin-top: 100px;
+            box-sizing: border-box;
+            /* border: 3px rebeccapurple solid; */
+            padding: 0px;
+        }
+
+        .puzzle-block {
+            position: relative;
+            box-sizing: border-box;
+            border: 1px solid black;
+            transition: .3s;
+            z-index: 2;
+            overflow: hidden;
+        }
+
+        #block-empty {
+            position: relative;
+            z-index: 1;
+            border: none;
+            /* background-color: darkseagreen; */
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="container">
+        <div class="row">
+            <div id="puzzle-body" class="col-8 d-flex flex-wrap">
+
+            </div>
+            <div class="col">
+                <button id="randBt">random</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        var GAME_LEVEL = 4;
+        var BLOCK_POS_STAT = [];
+        var IMG_URL = 'https://picsum.photos/500/500/';
+        AddBlocks();
+        document.getElementById('randBt').addEventListener('click', RandomBlocks);
+        window.addEventListener('resize', function () {
+            ReFreshDisplayBlock();
+        });
+
+
+        function AddBlocks() {
+            let pBody = document.getElementById('puzzle-body');
+            pBody.innerHTML = '';
+            let pBodyWidth = pBody.offsetWidth;
+            let blockSize = pBodyWidth / GAME_LEVEL - 10;
+
+            for (let rowIndex = 0; rowIndex < GAME_LEVEL * GAME_LEVEL; rowIndex += GAME_LEVEL) {
+                let rowData = [];
+                for (let colIndex = 0; colIndex < GAME_LEVEL; colIndex++) {
+                    let newBlock = document.createElement('div');
+                    let blockIdNumber = rowIndex + colIndex;
+                    newBlock.id = 'block-' + blockIdNumber;
+                    rowData.push({
+                        Id: newBlock.id,
+                        Top: 0,
+                        Left: 0
+                    });
+                    newBlock.className = 'puzzle-block';
+                    newBlock.style.width = blockSize + 'px';
+                    newBlock.style.height = blockSize + 'px';
+
+                    let newImg = document.createElement('img');
+                    newImg.src = IMG_URL;
+                    newImg.style.width = pBodyWidth.toString() + 'px';
+                    newImg.style.height = pBodyWidth.toString() + 'px';
+                    newImg.style.marginLeft = (-100 * colIndex).toString() + '%';
+                    newImg.style.marginTop = (-100 * (rowIndex / GAME_LEVEL)).toString() + '%';
+                    newBlock.appendChild(newImg);
+
+                    newBlock.addEventListener('click', MoveBlock)
+                    pBody.appendChild(newBlock);
+                };
+                BLOCK_POS_STAT.push(rowData);
+            };
+            SetEmptyBlock(pBody);
+            ReFreshDisplayBlock();
+        };
+
+        function RandomBlocks() {
+            let repeatTimes = Math.pow(GAME_LEVEL, 2) * 10;
+            for (let index = 0; index < repeatTimes; index++) {
+                let offsetPos = [];
+                let randNum = Math.random();
+                if (randNum <= 0.25) { offsetPos.push(1); offsetPos.push(0); }
+                else if (randNum <= 0.5) { offsetPos.push(0); offsetPos.push(1); }
+                else if (randNum <= 0.75) { offsetPos.push(-1); offsetPos.push(0); }
+                else if (randNum <= 1.0) { offsetPos.push(0); offsetPos.push(-1); };
+
+                let emptyPos = FindPosInTable('block-empty');
+                if (emptyPos[0] + offsetPos[0] >= 0 && emptyPos[1] + offsetPos[1] >= 0 &&
+                    emptyPos[0] + offsetPos[0] < GAME_LEVEL && emptyPos[1] + offsetPos[1] < GAME_LEVEL
+                ) {
+                    let targetPos = [emptyPos[0] + offsetPos[0], emptyPos[1] + offsetPos[1]];
+                    UpdateTableData(emptyPos, offsetPos[0], offsetPos[1]);
+                    UpdateTableData(targetPos, -offsetPos[0], -offsetPos[1]);
+                    SwapBlockDataOnTable(targetPos, emptyPos);
+                } else {
+                    index--;
+                }
+            };
+
+            DoRandomAnimation();
+            setTimeout(function () {
+                DoRandomAnimation();
+            }, 300);
+            setTimeout(function () {
+                ReFreshDisplayBlock();
+            }, 600);
+        };
+
+        function DoRandomAnimation() {
+            let blocks = document.querySelectorAll('.puzzle-block');
+            let pBody = document.getElementById('puzzle-body');
+            let moveDistance = pBody.offsetWidth;
+            blocks.forEach(block => {
+                let off1 = Math.floor(Math.random() * moveDistance - moveDistance / 2);
+                let off2 = Math.floor(Math.random() * moveDistance - moveDistance / 2);
+
+                block.style.top = off1.toString() + 'px';
+                block.style.left = off2.toString() + 'px';
+            });
+        };
+
+        function SetEmptyBlock(puzzleBody) {
+            let targeBlock = puzzleBody.lastChild;
+            targeBlock.id = 'block-empty';
+            targeBlock.innerText = '';
+            targeBlock.style.backgroundImage = '';
+            targeBlock.removeEventListener('click', MoveBlock);
+            BLOCK_POS_STAT[GAME_LEVEL - 1][GAME_LEVEL - 1] = {
+                Id: targeBlock.id,
+                Top: 0,
+                Left: 0
+            };
+        };
+
+        function MoveBlock() {
+            let clickedPos = FindPosInTable(this.id);
+            let emptyPos = FindPosInTable('block-empty');
+
+            if (CheckBlockSwap(clickedPos, emptyPos)) {
+                let offset = GetOffset(clickedPos, emptyPos);
+                // ConvertPosToPxOffset(offset);
+                UpdateTableData(clickedPos, offset[0], offset[1]);
+                UpdateTableData(emptyPos, -offset[0], -offset[1]);
+                SwapBlockDataOnTable(clickedPos, emptyPos);
+                ReFreshDisplayBlock();
+                CheckGameIsWin();
+            };
+        };
+
+        function ReFreshDisplayBlock() {
+            let pBodyWidth = document.getElementById('puzzle-body').offsetWidth;
+            let blockSize = pBodyWidth / GAME_LEVEL - 10;
+
+            let blocks = document.getElementById('puzzle-body').querySelectorAll('.puzzle-block');
+            blocks.forEach(block => {
+                let pos = FindPosInTable(block.id);
+
+                block.style.width = blockSize.toString() + 'px';
+                block.style.height = blockSize.toString() + 'px';
+
+                block.style.left = (BLOCK_POS_STAT[pos[0]][pos[1]].Left * blockSize) + 'px';
+                block.style.top = (BLOCK_POS_STAT[pos[0]][pos[1]].Top * blockSize) + 'px';
+
+
+                let insideImg = block.querySelector('img');
+                if (insideImg != null) {
+                    insideImg.style.width = pBodyWidth.toString() + 'px';
+                    insideImg.style.height = pBodyWidth.toString() + 'px';
+                }
+            });
+        };
+
+        function SwapBlockDataOnTable(pos1, pos2) {
+            let tempId = BLOCK_POS_STAT[pos1[0]][pos1[1]].Id;
+            let tempTop = BLOCK_POS_STAT[pos1[0]][pos1[1]].Top;
+            let tempLeft = BLOCK_POS_STAT[pos1[0]][pos1[1]].Left;
+
+            BLOCK_POS_STAT[pos1[0]][pos1[1]].Id = BLOCK_POS_STAT[pos2[0]][pos2[1]].Id;
+            BLOCK_POS_STAT[pos1[0]][pos1[1]].Top = BLOCK_POS_STAT[pos2[0]][pos2[1]].Top;
+            BLOCK_POS_STAT[pos1[0]][pos1[1]].Left = BLOCK_POS_STAT[pos2[0]][pos2[1]].Left;
+
+            BLOCK_POS_STAT[pos2[0]][pos2[1]].Id = tempId;
+            BLOCK_POS_STAT[pos2[0]][pos2[1]].Top = tempTop;
+            BLOCK_POS_STAT[pos2[0]][pos2[1]].Left = tempLeft;
+        };
+
+        function UpdateTableData(targetPosition, rowPx, colPx) {
+            let row = targetPosition[0];
+            let col = targetPosition[1];
+            let block = BLOCK_POS_STAT[row][col];
+            block.Left += colPx;
+            block.Top += rowPx;
+        };
+
+        function CheckBlockSwap(pos1, pos2) {
+            let distance = Math.pow((pos1[0] - pos2[0]), 2) + Math.pow((pos1[1] - pos2[1]), 2);
+            return (distance === 1) ? true : false;
+        };
+
+        function GetOffset(clickPos, emptyPos) {
+            let result = [0, 0];
+            if (clickPos[0] - emptyPos[0] == 1) {
+                result[0] = -1;
+            };
+            if (clickPos[0] - emptyPos[0] == -1) {
+                result[0] = 1;
+            };
+            if (clickPos[1] - emptyPos[1] == 1) {
+                result[1] = -1;
+            };
+            if (clickPos[1] - emptyPos[1] == -1) {
+                result[1] = 1;
+            };
+            return result;
+        };
+
+        function FindPosInTable(elementId) {
+            let result = [];
+            for (let rowIndex = 0; rowIndex < BLOCK_POS_STAT.length; rowIndex++) {
+                for (let colIndex = 0; colIndex < BLOCK_POS_STAT[rowIndex].length; colIndex++) {
+                    if (BLOCK_POS_STAT[rowIndex][colIndex].Id == elementId) {
+                        result.push(rowIndex);
+                        result.push(colIndex);
+                        break;
+                    };
+                };
+            };
+            return result;
+        };
+
+        function ConvertPosToPxOffset(inputRowAndColArray) {
+            let blockSize = document.getElementById('puzzle-body').firstChild.style.width;
+            let newValue = parseInt(blockSize.replace('px', ''));
+            inputRowAndColArray[0] *= newValue;
+            inputRowAndColArray[1] *= newValue;
+        };
+
+        function CheckGameIsWin() {
+            let win = true;
+            for (let rowIndex = 0; rowIndex < GAME_LEVEL; rowIndex++) {
+                for (let colIndex = 0; colIndex < GAME_LEVEL; colIndex++) {
+                    if (BLOCK_POS_STAT[rowIndex][colIndex].Left != 0 || BLOCK_POS_STAT[rowIndex][colIndex].Top != 0) {
+                        win = false;
+                        break;
+                    };
+                };
+            };
+
+            if (win) {
+                setTimeout(function () {
+                    alert('YOU WIN!!');
+                }, 300);
+            };
+        };
+    </script>
+    <!-- Optional JavaScript -->
+    <!-- jQuery first, then Popper.js, then Bootstrap JS -->
+    <script src="https://code.jquery.com/jquery-3.4.1.slim.min.js"
+        integrity="sha384-J6qa4849blE2+poT4WnyKhv5vZF5SrPo0iEjwBvKU7imGFAV0wwj1yYfoRSJoZ+n"
+        crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js"
+        integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo"
+        crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js"
+        integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6"
+        crossorigin="anonymous"></script>
+</body>
+
+</html>
