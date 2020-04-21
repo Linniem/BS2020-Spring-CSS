@@ -14,11 +14,53 @@
     <style>
         /* Always set the map height explicitly to define the size of the div
        * element that contains the map. */
-        #map {
-            height: 100%;
-            width: 75%;
-            right: -25%;
+        @media screen and (max-width: 576px) {
+            #map {
+                height: 100%;
+                width: 100%;
+            }
+
+            #bt-expand-county {
+                position: absolute;
+                bottom: 0px;
+                background-color: rgb(163, 222, 135);
+                width: 100%;
+                text-align: center;
+                font-size: 28px;
+                color: white;
+            }
+
+            .county-menu-m-close {
+                position: absolute;
+                z-index: 99;
+                height: 0%;
+                bottom: 0%;
+                transition: .3s;
+            }
+
+            .county-menu-m-open {
+                position: absolute;
+                z-index: 99;
+                height: 100%;
+                bottom: 0%;
+                transition: .4s;
+            }
         }
+
+        @media screen and (min-width: 577px) {
+            #map {
+                height: 100%;
+                width: 75%;
+                right: -25%;
+            }
+
+            #county-menu {
+                width: 25%;
+                height: 100%;
+            }
+        }
+
+
 
         /* Optional: Makes the sample page fill the window. */
         html,
@@ -43,21 +85,6 @@
         .list-group-item:first-child,
         .list-group-item:last-child {
             border-radius: 0px;
-        }
-
-        @media screen and (max-width: 576px) {
-            #text-choose-contry li {
-                padding: 1px;
-            }
-
-            #countyList>li {
-                padding: 12px;
-            }
-
-            #countyList .display-town {
-                padding: 12px 0px;
-                font-size: 18px;
-            }
         }
 
         li {
@@ -94,21 +121,21 @@
 </head>
 
 <body>
-    <div class="container-fluid position-absolute w-25 h-100 overflow-auto">
+    <div id="county-menu" class="county-menu-m-close container-fluid position-absolute overflow-auto">
         <div class="row">
             <div class="col p-0">
                 <ul class="list-group" id="text-choose-contry">
-                    <li class="list-group-item">選擇縣市</li>
+                    <li id="countyTitle" class="list-group-item">選擇縣市</li>
                 </ul>
                 <ul class="list-group" id="countyList"></ul>
             </div>
         </div>
     </div>
     <div id="map"></div>
+    <div id="bt-expand-county">點我選擇地區</div>
 
     <script>
         const URL = "https://raw.githubusercontent.com/kiang/pharmacies/master/json/points.json";
-        // const URL = 'https://linniem-web.azurewebsites.net/pages/Javascript/0410%20hackathon/NewMaskData.json'
         // const URL = "NewMaskData.json";
         var MAP_ELEMENT;
         var FEATURES;
@@ -175,6 +202,7 @@
                 };
                 SetInfoWindow(marker, feature);
                 CollectCounties(feature.properties);
+                AddMobileMenuEvent();
             });
         };
 
@@ -335,8 +363,20 @@
             };
         };
 
+        function AddMobileMenuEvent() {
+            document.getElementById('bt-expand-county').addEventListener('click', function () {
+                let classStat = document.getElementById('county-menu').className;
+
+                if (classStat.indexOf('county-menu-m-close') != 1) {
+                    document.getElementById('county-menu').className = classStat.replace('county-menu-m-close', 'county-menu-m-open');
+                };
+            });
+
+            document.getElementById('countyTitle').addEventListener('click',EventHideMobileMenu);
+        };
+
         function FindCountyIndex(countyName) {
-            resultIndex = -1;
+            let resultIndex = -1;
             for (let index = 0; index < COUNTIES_TOWNS.length; index++) {
                 if (COUNTIES_TOWNS[index].countryName == countyName) {
                     resultIndex = index;
@@ -392,8 +432,7 @@
         }
 
         function EventClickTown() {
-            CLOSE_COUNTY = false;
-
+            CLOSE_COUNTY = false;       
             for (let index = 0; index < FEATURES.length; index++) {
                 let townName = this.innerText;
                 let countyName = this.parentNode.childNodes[0].data;
@@ -408,11 +447,18 @@
                     break;
                 };
             };
+            EventHideMobileMenu();
+        };
+
+        function EventHideMobileMenu() {
+            let classStat = document.getElementById('county-menu').className;
+            if (classStat.indexOf('county-menu-m-open') != 1) {
+                document.getElementById('county-menu').className = classStat.replace('county-menu-m-open', 'county-menu-m-close');
+            };
         };
 
         function ClearDisplayedTownElements() {
             let countryNodes = document.querySelectorAll('.display-town');
-
             if (countryNodes.length != 0) {
                 countryNodes[0].parentNode.addEventListener('click', EventClickCounty);
             };
