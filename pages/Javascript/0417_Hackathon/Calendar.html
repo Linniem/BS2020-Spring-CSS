@@ -1,0 +1,120 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css"
+        integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+
+    <title>Calendar</title>
+    <style>
+        #monthBlock{
+            padding: 10px 0px;
+        }
+        #weekDaySign>* {
+            border: 1px solid rgb(168, 168, 168);
+            padding: 10px 0px;
+        }
+
+        .weekRow>* {
+            border: 1px solid rgb(226, 226, 226);
+            padding-bottom: 50px;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="container-fluid">
+        <div class="row">
+            <div id="monthBlock" class="col text-center">
+                Set Month
+            </div>
+        </div>
+
+        <div class="row text-center" id="weekDaySign">
+            <div class="col">日</div>
+            <div class="col">一</div>
+            <div class="col">二</div>
+            <div class="col">三</div>
+            <div class="col">四</div>
+            <div class="col">五</div>
+            <div class="col">六</div>
+        </div>
+
+        <div id="dayBlock">
+
+        </div>
+    </div>
+
+
+    <script>
+        Init();
+
+        function Init() {
+            DrawWeeks(new Date());
+        };
+
+        function DrawWeeks(inputDate) {
+            document.getElementById('monthBlock').innerText = (inputDate.getMonth() + 1) + '月';
+
+            inputDate.setDate(1);
+
+            let CurrentMonth = inputDate.getMonth() + 1;
+            while (inputDate.getMonth() + 1 == CurrentMonth) {
+                DrawAWeek(inputDate);
+            };
+        };
+
+        function DrawAWeek(inputDate) {
+            let CurrentMonth = inputDate.getMonth() + 1;
+            if (inputDate.getDate() == 1) {
+                inputDate.setDate(-inputDate.getDate() - 1)
+            };
+
+            let dayBlock = document.getElementById('dayBlock');
+            let weekRow = document.createElement('div');
+            weekRow.className = 'weekRow row';
+            for (let weekDay = 0; weekDay < 7; weekDay++) {
+                let newDay = document.createElement('div');
+                newDay.id = 'y' + inputDate.getFullYear() + 'm' + (inputDate.getMonth() + 1) + 'd' + inputDate.getDate();
+                newDay.className = 'col';
+                if (inputDate.getDay() == weekDay) {
+                    if (CurrentMonth != inputDate.getMonth() + 1) {
+                        newDay.style.color = 'rgb(180, 180, 180)';
+                    };
+                    newDay.innerText = inputDate.getDate();
+                    newDay.addEventListener('click',AddSchedule);
+                    inputDate.setDate(inputDate.getDate() + 1);
+                };
+                weekRow.appendChild(newDay);
+            };
+            dayBlock.appendChild(weekRow);
+        };
+
+        function AddSchedule() {
+            let currentId = this.id;
+            currentId = currentId.replace('y',''); 
+            currentYear = parseInt(currentId);
+            console.log(currentYear);
+        };
+    </script>
+
+    <!-- Optional JavaScript -->
+    <!-- jQuery first, then Popper.js, then Bootstrap JS -->
+    <script src="https://code.jquery.com/jquery-3.4.1.slim.min.js"
+        integrity="sha384-J6qa4849blE2+poT4WnyKhv5vZF5SrPo0iEjwBvKU7imGFAV0wwj1yYfoRSJoZ+n"
+        crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js"
+        integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo"
+        crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js"
+        integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6"
+        crossorigin="anonymous"></script>
+</body>
+
+</html>
