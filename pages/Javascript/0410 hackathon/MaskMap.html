@@ -60,7 +60,7 @@
                 height: 100%;
             }
 
-            #bt-expand-county{
+            #bt-expand-county {
                 display: none;
             }
         }
@@ -147,6 +147,8 @@
         var EXIST_INFO_WINDOW = '';
         var COUNTIES_TOWNS = [];
         var CLOSE_COUNTY = true;
+        var ICON_URL_AVAILABLE = 'https://maps.google.com/mapfiles/kml/paddle/grn-stars.png';
+        var ICON_URL_NOSTUCK = 'https://maps.google.com/mapfiles/kml/paddle/red-square.png';
 
         GetJsonAndInit();
 
@@ -181,7 +183,7 @@
                     SetMakers();
                 } else {
                     alert('Failed to get JSON file.');
-                    console.log('Failed to get JSON file.');
+                    console.log('Failed to get JSON file. Please Contact linfly2222@gmail.com');
                 };
             };
             xhr.open("GET", URL);
@@ -212,23 +214,15 @@
         };
 
         function GetIconUrl(feature) {
-            let urlAvailable = 'https://maps.google.com/mapfiles/kml/paddle/grn-stars.png';
-            let urlNoStock = 'https://maps.google.com/mapfiles/kml/paddle/red-square.png';
-
             if (feature.properties.mask_adult === 0) {
-                return urlNoStock;
+                return ICON_URL_NOSTUCK;
             } else {
-                return urlAvailable;
+                return ICON_URL_AVAILABLE;
             };
         };
 
         function GetTitleText(feature) {
-            let titleText = '';
-            titleText += '成人: ';
-            titleText += feature.properties.mask_adult;
-            titleText += '\n兒童: ';
-            titleText += feature.properties.mask_child;
-            return titleText;
+            return `成人: ${feature.properties.mask_adult}\n兒童: ${feature.properties.mask_child}`;
         };
 
         function CorrectEmptyCountyTown(property) {
@@ -302,66 +296,36 @@
         };
 
         function GetInfoContent(properties) {
-            let infoContent = '';
-            let availableTable = GetAvailableTable(properties.available);
-
-            infoContent +=
-                '<div>' +
-                '<h5>' + properties.name + '</h5>' +
-                '<p>地址 : ' + properties.address + '</p>' +
-                '<p>電話 : ' + properties.phone + '</p>' +
-                '<p>成人口罩數量 : ' + properties.mask_adult + '</p>' +
-                '<p>兒童口罩數量 : ' + properties.mask_child + '</p>';
-
-            infoContent += availableTable;
-
-            infoContent +=
-                '<p>備註 : ' + properties.note + '</p>' +
-                '<p>最後更新時間 : ' + properties.updated + '</p>' +
-                '</div>';
-
-            return infoContent;
+            return `<div>
+                <h5>${properties.name}</h5>
+                <p>地址 : ${properties.address}</p>
+                <p>電話 : ${properties.phone}</p>
+                <p>成人口罩數量 : ${properties.mask_adult}</p>
+                <p>兒童口罩數量 : ${properties.mask_child}</p>
+                ${GetAvailableTable(properties.available)}
+                <p>備註 : ${properties.note}</p>
+                <p>最後更新時間 : ${properties.updated}</p>
+            </div>`;
         };
 
         function GetAvailableTable(rawTextAvailable) {
             // Filter useless string and convert to a array.
-            let availableStringArray = rawTextAvailable
-                .split('、')
-                .map(timeSection => timeSection.replace(/[星期上午下晚上一二三四五六日]/g, ''));
+            if (rawTextAvailable != '') {
+                let removeWeekDayTon = rawTextAvailable.replace(/[星期上午下晚上一二三四五六日]/g, '').replace(/、/g, '</td><td>');
+                let addMissingTrTag = `${removeWeekDayTon.slice(0, 73)}</tr><tr>${removeWeekDayTon.slice(73, 150)}</tr><tr>${removeWeekDayTon.slice(150)}`
+                return `<table><tbody><tr><th>星期一</th><th>星期二</th><th>星期三</th><th>星期四</th><th>星期五</th><th>星期六</th><th>星期日</th></tr><tr><td>${addMissingTrTag}</td></tr></tbody></table>`;
+            }
 
-            let beginText = '<table><tbody><tr><th>星期一</th><th>星期二</th><th>星期三</th><th>星期四</th><th>星期五</th><th>星期六</th><th>星期日</th></tr>';
-            let endText = '<tbody><table>';
-            let tableContent = '';
-
-            for (let trIndex = 0; trIndex < 3; trIndex++) {
-                tableContent += '<tr>';
-                for (let tdIndex = 0; tdIndex < 7; tdIndex++) {
-                    tableContent += '<td>';
-
-                    // add available status
-                    let available = availableStringArray[trIndex * tdIndex];
-                    if (available == undefined || available == '') {
-                        // avaliable is empty
-                        tableContent += ' - ';
-                    } else {
-                        tableContent += available;
-                    };
-                    tableContent += '</td>';
-                };
-                tableContent += '</tr>';
-            };
-
-            return beginText + tableContent + endText;
+            return `<table><tbody><tr><th>星期一</th><th>星期二</th><th>星期三</th><th>星期四</th><th>星期五</th><th>星期六</th><th>星期日</th></tr><tr><td> - </td><td> - </td><td> - </td><td> - </td><td> - </td><td> - </td><td> - </td></tr><tr><td> - </td><td> - </td><td> - </td><td> - </td><td> - </td><td> - </td><td> - </td></tr><tr><td> - </td><td> - </td><td> - </td><td> - </td><td> - </td><td> - </td><td> - </td></tr></tbody></table>`;
         };
 
         function CollectCounties(properties) {
-            let countyName = properties.county;
-            let countyIndex = FindCountyIndex(countyName);
+            let countyIndex = FindCountyIndex(properties.county);
 
             if (countyIndex == -1) {
                 // County not in list, push to list. { countryName:'', towns:[] }
-                COUNTIES_TOWNS.push({ countryName: countyName, towns: [] });
-                AddCountyElement(countyName);
+                COUNTIES_TOWNS.push({ countryName: properties.county, towns: [] });
+                AddCountyElement(properties.county);
             } else if (COUNTIES_TOWNS[countyIndex].towns.indexOf(properties.town) == -1) {
                 // County in list, but town not in the county's towns, push it to towns.
                 COUNTIES_TOWNS[countyIndex].towns.push(properties.town);
@@ -377,7 +341,7 @@
                 };
             });
 
-            document.getElementById('countyTitle').addEventListener('click',EventHideMobileMenu);
+            document.getElementById('countyTitle').addEventListener('click', EventHideMobileMenu);
         };
 
         function FindCountyIndex(countyName) {
@@ -437,7 +401,7 @@
         }
 
         function EventClickTown() {
-            CLOSE_COUNTY = false;       
+            CLOSE_COUNTY = false;
             for (let index = 0; index < FEATURES.length; index++) {
                 let townName = this.innerText;
                 let countyName = this.parentNode.childNodes[0].data;
